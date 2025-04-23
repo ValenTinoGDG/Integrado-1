@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="/css/styles.css">
+<div class="navbar">
+  <a href="/user/<%= id %>">📹 MyCamApp</a>
+
+  <div style="position: relative;">
+    <button id="menuButton">⚙️</button>
+    <div id="menuDropdown">
+      <a href="/user/<%= id %>">👤 Profile</a>
+      <a href="/user/<%= id %>/cams">📷 Cameras</a>
+      <a href="#" id="logoutLink">🚪 Log out</a>
+    </div>
+  </div>
+</div>
+
+<%- include('firebase-auth') %>
+
+<script type="module">
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+
+  const menuBtn = document.getElementById('menuButton');
+  const menuDropdown = document.getElementById('menuDropdown');
+
+  menuBtn.addEventListener('click', () => {
+    menuDropdown.style.display = menuDropdown.style.display === 'block' ? 'none' : 'block';
+  });
+
+  document.getElementById('logoutLink').addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    // Sign out from Firebase (clears auth state)
+    const auth = getAuth();
+    try {
+      await signOut(auth);
+      console.log('Firebase session cleared');
+      // Clear idToken cookie with common variants (just in case)
+      document.cookie = "idToken=; Path=/; Max-Age=0; Secure; SameSite=Lax";
+      document.cookie = "idToken=; Path=/; Max-Age=0"; // fallback
+      document.cookie = "idToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+      // Redirect
+      window.location.href = '/login';
+    } catch (err) {
+      console.error('Firebase sign-out failed:', err);
+    }
+
+    
+  });
+</script>

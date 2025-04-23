@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camarás</title>
+</head>
+<body>
+    <h1>CAMERAS</h1>
+    <% if (cams.length === 0) { %>
+        <p>No cameras added yet</p>
+    <% } else { %>
+        <% cams.forEach((cam) => { %>
+        <div class="video-container">
+            <h2><%= cam.name %></h2>
+            <video id="video" width="640" controls muted>
+                <source id="video-source" type="application/x-mpegURL" src="<%= `/user/${id}/${cam.id}/index.m3u8` %>">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <% }) %>
+    <% } %>
+    <a href="/user/<%= id %>/cams/config">Configure</a>
+
+    <script>
+        const video = document.getElementById('video');
+        const videoSource = document.getElementById('video-source');
+    
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(videoSource.src);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.play();
+            });
+        }
+        // If the browser supports HLS natively (like Safari), use the video tag directly
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSource.src;
+            video.addEventListener('canplay', function() {
+                video.play();
+            });
+        }
+    </script>
+</body>
+</html>

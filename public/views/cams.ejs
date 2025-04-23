@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Cameras</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+  <!-- Navbar Partial -->
+  <%- include('partials/navbar', { id }) %>
+
+  <div class="container">
+    <div class="add-btn-container">
+      <a href="/user/<%= id %>/cams/conf">+ Add Camera</a>
+      <button class="btn-restart" onclick="restartStreams()">🔁 Restart Streams</button>
+    </div>
+
+    <div class="cams-grid">
+      <% if (cams.length === 0) { %>
+        <p style="grid-column: 1 / -1; text-align: center;">No cameras yet.</p>
+      <% } else { %>
+        <% cams.forEach(cam => { %>
+          <div class="cam-card">
+            <div class="cam-preview">
+              <div class="cam-placeholder">No preview</div>
+            </div>
+            <div class="cam-info">
+              <h3><%= cam.name %></h3>
+              <p><strong>IP:</strong> <%= cam.ip %></p>
+              <p><strong>User:</strong> <%= cam.user %></p>
+              <p><strong>Password:</strong> <%= cam.password %></p>
+            </div>
+            <div class="cam-actions">
+              <a class="btn btn-go" href="/user/<%= id %>/cams/<%= cam.id %>">▶️ Go</a>
+              <a class="btn btn-edit" href="/user/<%= id %>/cams/conf/<%= cam.id %>">✏️ Edit</a>
+              <button class="btn btn-delete" onclick="deleteCamera('<%= cam.id %>')">🗑️ Delete</button>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+
+  <script>
+    function restartStreams() {
+      fetch('/user/<%= id %>/restart-streams', {
+        method: 'POST',
+        credentials: 'include'
+      })
+      .then(() => {
+        window.location.reload(); // or redirect to same page if you prefer
+      })
+      .catch(err => {
+        console.error('Failed to restart streams:', err);
+        alert('Something went wrong while restarting streams.');
+      });
+    }
+
+    function deleteCamera(camId) {
+      fetch('/user/<%= id %>/cams/delete', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ camId: camId })
+      })
+      .then(() => {
+        window.location.reload(); // or redirect to same page if you prefer
+      })
+      .catch(err => {
+        console.error('Failed to delete camera:', err);
+        alert('Something went wrong while deleting the camera.');
+      });
+    }
+  </script>
+
+</body>
+</html>

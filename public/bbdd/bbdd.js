@@ -1,12 +1,12 @@
 import fs from 'fs';
+import { randomUUID } from 'crypto';
 
 console.log('bbdd ejecutandose...');
 
 const userBluePrint = {
   inUse: false,
   data: {
-    name: "",
-    password: "",
+    email: "",
     cams: []
   }
 }
@@ -22,8 +22,7 @@ function writeFile(db, id, file) {
 
 async function getUserByID (id) {
   try {
-    const user = await openFile("users", id);
-    console.log(user);
+    const user = await openFile("user", id);
     return user.data;
   } catch (error) {
     console.error("Error:", error.message);
@@ -31,27 +30,78 @@ async function getUserByID (id) {
   }
 };
 
-async function addCam (id, cam) {
+async function delCam(userId, camId) {
   try {
-    const user = await openFile("users", id); // Obtener los datos del usuario
+    // Si no hay ID de camara nos vamos
+    if (!camId) {
+      console.error("Camera ID is required to delete.");
+      return null;
+    }
 
-    //if(user.inUse) return null;
-    
-    const camPath = "./public/bbdd/users/" + id + "/" + cam.id // Decidimos una ruta para almacenar el video de la camara
-    
-    if(user.data.cams.find(e => e.id == cam.id)) return "2" // Si ya existe una camara con ese ID cancelamos
-    
-    user.data.cams.push( // Añadimos los datos de la camara
-      {
-        id: cam.id,
-        name: cam.name,
-        path: camPath
-      }
-    )
+    const user = await openFile("user", userId); // Caragamos los datos del usuario
 
-    if(!writeFile("users", id, user)) return null; // Los guardamos en la base de datos
+    // Quitamos la camara (si existe)
+    const originalLength = user.data.cams.length;
+    user.data.cams = user.data.cams.filter(cam => cam.id !== camId);
 
-    if(!fs.existsSync(camPath)){ // Creamos la ruta que hemos decidido (si no existe ya)
+    // Si no existe nos vamos
+    if (user.data.cams.length === originalLength) {
+      console.warn(`Camera with ID ${camId} not found.`);
+      return null;
+    }
+
+    // Guardamos los datos
+    if (!writeFile("user", userId, user)) return null;
+
+    // Borramos la ruta de la camara elminada
+    const camPath = `./public/bbdd/user/${userId}/${camId}`;
+    if (fs.existsSync(camPath)) {
+      fs.rmSync(camPath, { recursive: true, force: true });
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting camera:", error.message);
+    return null;
+  }
+}
+
+async function addCam(id, newCam) {
+  try {
+    const user = await openFile("user", id); // Obtener los datos del usuario
+
+    // Generamos una ID si no hay (caso de editar)
+    if (!newCam.id) {
+      newCam.id = crypto.randomUUID();
+    }
+
+    const camPath = "./public/bbdd/user/" + id + "/" + newCam.id;
+
+    user.data.cams.forEach(oldCam => {
+      console.log(oldCam.id, newCam.id)
+    });
+
+    // Buscamos si ya existe (caso de editar)
+    if (user.data.cams.find(oldCam => oldCam.id === newCam.id)){
+      // Borramos la vieja
+      user.data.cams = user.data.cams.filter(oldCam => oldCam.id != newCam.id )
+      console.log(user.data.cams)
+    } 
+
+    // Le metemos la camara
+    user.data.cams.push({
+      id: newCam.id,
+      name: newCam.name,
+      ip: newCam.ip,
+      user: newCam.user,
+      password: newCam.password
+    });
+
+    // Gaurdamos el archivo actualizado
+    if (!writeFile("user", id, user)) return null;
+
+    // Creamos la carpeta de la camara si no existe
+    if (!fs.existsSync(camPath)) {
       fs.mkdirSync(camPath);
     }
 
@@ -62,12 +112,12 @@ async function addCam (id, cam) {
   }
 }
 
-async function createUser (id, name, password) {
+async function createUser (id, email) {
   var user = userBluePrint;
-  user.data.name = name;
-  user.data.password = password;
+  user.data.email = email;
+  user.data.id = id;
 
-  const userPath = "./public/bbdd/users/" + id 
+  const userPath = "./public/bbdd/user/" + id 
 
   if(!fs.existsSync(userPath)){ // Creamos la ruta que hemos decidido (si no existe ya)
     fs.mkdirSync(userPath);
@@ -75,14 +125,15 @@ async function createUser (id, name, password) {
     return 2;
   }
 
-  writeFile("users", id, user);
+  writeFile("user", id, user);
   return 1;
 }
 
 const users = {
   getUserByID,
   addCam,
-  createUser
+  createUser,
+  delCam
 };
 
 export default users;

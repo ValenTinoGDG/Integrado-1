@@ -1,0 +1,16 @@
+{
+  "inUse": false,
+  "data": {
+    "email": "as@as.com",
+    "cams": [
+      {
+        "id": "2e172d8a-5208-4ae7-8b4c-6c2f7364c46a",
+        "name": "Cam1",
+        "ip": "172.17.242.139/stream1",
+        "user": "camara",
+        "password": "camara"
+      }
+    ],
+    "id": "FJuip5suEYdDs7aK7IXQmcpqUrX2"
+  }
+}

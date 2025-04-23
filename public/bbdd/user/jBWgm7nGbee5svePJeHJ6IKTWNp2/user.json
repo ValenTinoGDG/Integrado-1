@@ -1,0 +1,16 @@
+{
+  "inUse": false,
+  "data": {
+    "email": "ap@ap.com",
+    "cams": [
+      {
+        "id": "cam_1744661977783_5955",
+        "name": "Camara patio",
+        "ip": "192.168.0.18:1945",
+        "user": "",
+        "password": ""
+      }
+    ],
+    "id": "jBWgm7nGbee5svePJeHJ6IKTWNp2"
+  }
+}

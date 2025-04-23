@@ -1,96 +1,169 @@
-import fs from 'fs';
-import path from 'path';
-import { WebSocketServer } from 'ws'
+import fs from 'fs';                        // Esto para manipular el sistema de archivos   
+import path from 'path';                    // Esto para convertir rutas relativas a absolutas, unir rutas, etc
+import { WebSocketServer } from 'ws';       // Nos permite usar websockets
+import { auth } from './firebase-config.js';// Incluye nuestra autenticficación de firebase
 
-export default function wsReceiver () {
-    // WebSocket server setup
-    const wss = new WebSocketServer({ port: 8080 });
+export const userSockets = new Map();       // Crea una especie de aray/diccionario que en base a una clave devuelve un valor
 
-    let fileBuffers = {};
+// Nos da la ruta de la carpeta de un usuario o de su camara en base a las IDs
+function bbddPath(userId, camId) {
+    return camId ? `./public/bbdd/user/${userId}/${camId}` : `./public/bbdd/user/${userId}`;
+}
 
-    // Handling WebSocket connection from Server A
+// Verifica un token
+async function verifyFirebaseToken(token) {
+    try {
+        const decodedToken = await auth.verifyIdToken(token);               // Lo intenta validar con firebase
+        return decodedToken;                                                // Devuelve token decodificado (es el usuario)
+    } catch (error) {
+        console.error('Ha fallado la verificación: ', error);               // Si falla 
+        return null;
+    }
+}
+
+// Exporta la función para crear un servidor websocket
+export default function wsReceiver(server) {
+    console.log("Escuchando en websocket")
+    const wss = new WebSocketServer({ server });         // Crea el servidor de recepción con el mismo puerto que express
+
+    const fileBuffers = new Map(); // Asocia un archivo con sus chunks o trozos
+    const authMap = new WeakMap(); // Asocia una sesión de websocket a un usuario
+
+    // Se ejecuta en cada conexión
     wss.on('connection', (ws) => {
-        console.log('Server  connected');
-        
-        let currentFileStream = null;
-        let currentFileName = null;
-        
-        ws.on('message', (message) => {
-            let data;
-            let receiveFolder;
-            let userId, camId;
-            receiveFolder = bbddPath(userId, camId);
-            console.log(data);
+        console.log('--Un cliente conectado--');
+
+        // Se ejecuta en cada mensaje del cliente
+        ws.on('message', async (message) => {
+            let parsed; // Inicializamos una variable para parsear los mensajes JSON
             try {
-                data = JSON.parse(message);
-                console.log(data)
+                parsed = JSON.parse(message);   // Parseamos
             } catch (err) {
-                console.error('Failed to parse message:', err);
+                console.error('Fallo al leer JSON: ', err);
                 return;
             }
-            
-            if (data.type === 'chunk') {
-                // Handle file chunk with metadata
-                const { fileId, userId, camId, fileName, mimeType, fileSize, chunk } = data.data;
+
+            const { type, data } = parsed;      // Extraemos el tipo de mensaje y su información
+
+            // Al principio de cada conexión se autoriza la conexión con su token
+            if (type === 'auth') {
                 
-                if (!fileBuffers[fileId]) {
-                    // Initialize the file buffer if it's the first chunk for this file
-                    fileBuffers[fileId] = {
+                const { userId, token } = data; // Extraemos la is de usuario y el token (deben coincidir)
+
+                // Si no hay token adios
+                if (!token) {
+                    console.warn('⚠️ Missing token in auth message');
+                    ws.close(4001, 'Authentication token required');
+                    return;
+                }
+
+                const decodedToken = await verifyFirebaseToken(token);          // Obtenemos el toekn decodificado
+
+                // Si no es valido o no coincide adios
+                if (!decodedToken || decodedToken.uid !== userId) {             
+                    console.warn(`🚫 Unauthorized access attempt: ${decodedToken ? decodedToken.uid : 'invalid token'}`);
+                    ws.close(4002, 'Unauthorized');
+                    return;
+                }
+
+                const userFolder = `./public/bbdd/user/${userId}`;              // La carpeta de usuario en el servidor (en base a su ID)
+                if (!fs.existsSync(userFolder)) {                               
+                    console.warn(`🚫 Folder for user ${userId} does not exist`);
+                    ws.close(4003, 'User folder does not exist');
+                    return;
+                }
+
+                authMap.set(ws, { userId, token });
+
+                if (!userSockets.has(userId)) {
+                    userSockets.set(userId, new Set());
+                }
+                userSockets.get(userId).add(ws);
+
+                console.log(`✅ Authenticated user ${userId}`);
+                return;
+            }
+
+            const auth = authMap.get(ws);
+            if (!auth) {
+                console.warn('🔒 Unauthorized client tried to send data');
+                ws.close(4004, 'Unauthorized');
+                return;
+            }
+
+            if (type === 'chunk') {
+                const { fileId, userId, camId, fileName, mimeType, fileSize, chunk } = data;
+
+                if (userId !== auth.userId) {
+                    console.warn(`🚫 Mismatched userId in chunk: expected ${auth.userId}, got ${userId}`);
+                    return;
+                }
+
+                if (!fileBuffers.has(fileId)) {
+                    fileBuffers.set(fileId, {
                         userId,
                         camId,
                         fileName,
                         mimeType,
                         fileSize,
-                        buffer: Buffer.alloc(0), // Create an empty buffer for file data
-                    };
+                        buffer: Buffer.alloc(0)
+                    });
                 }
-                
-                // Append the chunk to the corresponding file's buffer
+
+                const fileInfo = fileBuffers.get(fileId);
                 const buffer = Buffer.from(chunk, 'base64');
-                fileBuffers[fileId].buffer = Buffer.concat([fileBuffers[fileId].buffer, buffer]);
-                
-                console.log(`Received chunk for ${fileName} (ID: ${fileId}), total size: ${fileBuffers[fileId].buffer.length} bytes`);
-                
-                // Optionally, handle progress or manage file completion here
-                if (fileBuffers[fileId].buffer.length === fileSize) {
-                    // Write the file to disk when it is fully received
-                    const filePath = path.join(receiveFolder, fileName);
-                    fs.writeFileSync(filePath, fileBuffers[fileId].buffer);
-                    console.log(`File ${fileName} written to disk.`);
-                    
-                    // Clear the buffer after the file is written
-                    delete fileBuffers[fileId];
+                fileInfo.buffer = Buffer.concat([fileInfo.buffer, buffer]);
+
+                console.log(`📥 Chunk received for ${fileName}, total size: ${fileInfo.buffer.length}`);
+
+                if (fileInfo.buffer.length === fileInfo.fileSize) {
+                    const folder = bbddPath(userId, camId);
+                    fs.mkdirSync(folder, { recursive: true });
+
+                    const filePath = path.join(folder, fileName);
+                    fs.writeFileSync(filePath, fileInfo.buffer);
+                    console.log(`✅ File ${fileName} saved to ${filePath}`);
+
+                    fileBuffers.delete(fileId);
                 }
             }
-            
-            if (data.type === 'delete') {
-                // Handle file deletion request from Server A
-                const fileNameToDelete = data.data.fileName;
-                userId = data.data.userId;
-                camId = data.data.camId;
-                console.log(data, data.data);
-                const filePathToDelete = path.join(receiveFolder, fileNameToDelete);
-                
-                fs.unlink(filePathToDelete, (err) => {
+
+            if (type === 'delete') {
+                const { fileName, userId, camId } = data;
+
+                if (userId !== auth.userId) {
+                    console.warn(`🚫 Mismatched userId in delete: expected ${auth.userId}, got ${userId}`);
+                    return;
+                }
+
+                const filePath = path.join(bbddPath(userId, camId), fileName);
+                fs.unlink(filePath, (err) => {
                     if (err) {
-                        console.error(`Failed to delete file ${fileNameToDelete}:`, err);
+                        console.error(`❌ Failed to delete file ${fileName}:`, err);
                     } else {
-                        console.log(`File ${fileNameToDelete} deleted successfully from Server B`);
+                        console.log(`🗑️ File ${fileName} deleted from ${filePath}`);
                     }
                 });
             }
         });
-        
+
         ws.on('close', () => {
-            if (currentFileStream) {
-                currentFileStream.end();
-                console.log(`Received and saved file: ${currentFileName}`);
+            console.log('❎ WebSocket disconnected');
+            const auth = authMap.get(ws);
+            if (auth?.userId) {
+                const set = userSockets.get(auth.userId);
+                if (set) {
+                    set.delete(ws);
+                    if (set.size === 0) {
+                        userSockets.delete(auth.userId);
+                    }
+                }
             }
+            authMap.delete(ws);
         });
-        
+
         ws.on('error', (err) => {
             console.error('WebSocket error:', err);
         });
     });
-    console.log('Servidor de recepción está escuchando en ws://localhost:8080');
 }

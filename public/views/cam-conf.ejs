@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configure Camera</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <!-- Navbar Partial -->
+    <%- include('partials/navbar', { id }) %>
+
+  <div class="container">
+    <h2>➕ Add New Camera</h2>
+    <form action="/user/<%= id %>/cams/add" method="POST">
+
+      <input type="hidden" id="id" name="id" value="<%= camId %>">
+
+      <div>
+        <label for="name">Camera Name</label>
+        <input type="text" id="name" name="name" required />
+      </div>
+
+      <div>
+        <label for="ip">Camera IP/URN</label>
+        <input type="text" id="ip" name="ip" required />
+      </div>
+
+      <div>
+        <label for="user">Username</label>
+        <input type="text" id="user" name="user" required />
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
+      </div>
+
+      <button type="submit">Save Camera</button>
+    </form>
+
+    <a href="/user/<%= id %>/cams" class="back-link">← Back to Cameras</a>
+  </div>
+</body>
+</html>

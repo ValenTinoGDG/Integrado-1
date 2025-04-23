@@ -1,0 +1,14 @@
+{
+  "inUse": false,
+  "data": {
+    "email": "ss@ss.com",
+    "cams": [
+      {
+        "id": 1,
+        "name": "Camera 1",
+        "path": "./public/bbdd/users/uqVl3zINAlOBp5Ljnt70s67PPS53/1"
+      }
+    ],
+    "id": "uqVl3zINAlOBp5Ljnt70s67PPS53"
+  }
+}
