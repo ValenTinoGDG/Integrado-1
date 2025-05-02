@@ -1,388 +1,476 @@
 /* === Reset básico === */
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #111;
+  color: white;
+  line-height: 1.6;
+}
+
+/* === Fade Text for Overflow with Ellipsis === */
+.fade-text {
+  position: relative;
+  display: inline-block;
+  max-width: 100%; /* Ensure the element doesn't stretch to fill the container */
+  overflow: hidden;
+  white-space: nowrap; /* Prevents text from wrapping, ensuring overflow happens */
+  text-overflow: ellipsis; /* Adds the ellipsis when the text overflows */
+}
+
+.fade-text::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(to right, transparent);
+  pointer-events: none; /* Ensures that it doesn't block interaction */
+  opacity: 0; /* Hidden initially */
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* === Estilos de Navbar === */
+.navbar {
+  background: #222;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  margin-right: 1rem;
+}
+
+#menuButton {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: white;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+/* === Menu Dropdown === */
+#menuDropdown {
+  display: none;
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: #333;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  min-width: 160px;
+  z-index: 9999; /* Ensure the dropdown is on top */
+}
+
+/* Profile button inside the menu */
+#menuDropdown a {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: white;
+  text-decoration: none;
   
-  html, body {
-    height: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #111;
-    color: white;
-    line-height: 1.6;
-  }
-  
-  /* === Formulario de Autenticación === */
-  form#authForm {
-    width: 90%;
-    max-width: 400px;
-    padding: 2rem;
-    margin: 10vh auto 0 auto; /* margen superior del 10% */
-    background: #222;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  /* === Estilos de Navbar === */
+  border-radius: 6px; /* Ensure rounded corners */
+  transition: background 0.2s ease, border-radius 0.2s ease;
+}
+
+#menuDropdown a:hover {
+  background: #444;
+  border-radius: 6px; /* Keep the border-radius consistent */
+  margin-right: 0; /* Remove any margin to avoid extra space on the right */
+}
+
+/* Optional: You can also add a slight box-shadow on hover to make it stand out more */
+#menuDropdown a:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* === Contenedor principal === */
+.container,
+.cam-x-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+/* === Botones de acciones === */
+.add-btn-container {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.add-btn-container a,
+.btn-restart {
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 5px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.add-btn-container a {
+  background-color: #28a745;
+}
+
+.add-btn-container a:hover {
+  background-color: #218838;
+}
+
+.btn-restart {
+  background-color: #17a2b8;
+}
+
+.btn-restart:hover {
+  background-color: #138496;
+}
+
+/* === Grid de cámaras === */
+.cams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.cam-card {
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cam-preview {
+  background: #444;
+  height: 180px;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #bbb;
+  overflow: hidden;
+}
+
+.cam-info h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.cam-info p {
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+/* === Botones dentro de tarjetas === */
+.cam-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: opacity 0.2s ease;
+}
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+.btn-go {
+  background: #007bff;
+  color: white;
+}
+
+.btn-edit {
+  background: #ffc107;
+  color: black;
+}
+
+.btn-delete {
+  background: #dc3545;
+  color: white;
+}
+
+/* === Formularios generales === */
+form,
+.form-box {
+  background: #222;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 500px;
+  margin: 2rem auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+form input,
+form select,
+.form-box input {
+  width: 100%;
+  background: #333;
+  border: 1px solid #444;
+  color: white;
+  padding: 0.6rem;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+form label {
+  font-weight: bold;
+  color: #ccc;
+}
+
+form button,
+.form-box button {
+  background: #28a745;
+  color: white;
+  font-weight: bold;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+form button:hover,
+.form-box button:hover {
+  background-color: #218838;
+}
+
+/* === Enlace para regresar === */
+.back-link,
+.form-box a {
+  display: block;
+  margin-top: 1rem;
+  text-align: center;
+  color: #ccc;
+  text-decoration: none;
+}
+
+.back-link:hover,
+.form-box a:hover {
+  color: white;
+}
+
+/* === Layout página cam-x === */
+.cam-x-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2rem;
+  align-items: flex-start;
+}
+
+.cam-x-video-wrapper {
+  flex: 2;
+  background: #222;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden; /* Prevents overflow */
+  max-width: 100%; /* Prevents the video container from overflowing */
+  z-index: 100;
+}
+
+.cam-x-video-wrapper video {
+  width: 100%;
+  height: auto; /* Ensure the video scales responsively */
+  object-fit: cover; /* Ensures the video fills the container */
+  border-radius: 10px;
+}
+
+/* === New flex container for title + button === */
+.cam-x-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+  gap: 1rem;
+}
+
+.cam-x-header h1 {
+  flex: 1;
+  font-size: 1.5rem;
+  font-weight: bold;
+  white-space: nowrap;
+  position: relative;
+}
+
+.cam-x-header h1::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 3em;
+  pointer-events: none;
+}
+
+/* === Sidebar === */
+.cam-x-sidebar {
+  flex: 1;
+  background: #1a1a1a;
+  padding: 1rem;
+  border-radius: 10px;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 240px;
+}
+
+/* === Cam preview cards === */
+.cam-preview-card {
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.cam-preview-thumb {
+  height: 120px;
+  background: #444;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bbb;
+}
+
+.cam-preview-title {
+  font-size: 1rem;
+  color: #eee;
+}
+
+.no-other-cams {
+  color: #888;
+  text-align: center;
+  padding: 3rem 0;
+  font-style: italic;
+}
+
+/* === Canvas Overlay === */
+#face-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  border-radius: 10px; /* Matching the video container's rounded corners */
+}
+
+/* === Face Detection Toggle Button (now inline) === */
+#toggleFaces {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  transition: background-color 0.3s ease;
+}
+
+#toggleFaces:hover {
+  background-color: #0056b3;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
   .navbar {
-    background: #222;
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.1rem;
+    flex-wrap: wrap;
+    padding: 1rem;
+    
   }
-  
+
   .navbar a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    margin-right: 1rem;
+    margin: 0.5rem 0.5rem 0.5rem 0;
   }
-  
-  #menuButton {
-    background: transparent;
-    border: none;
-    font-size: 1.2rem;
-    color: white;
-    cursor: pointer;
-    margin-left: auto;
-  }
-  
-  #menuDropdown {
-    display: none;
-    position: absolute;
-    top: 120%;
-    right: 0;
-    background: #333;
-    border-radius: 6px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    min-width: 160px;
-  }
-  
-  #menuDropdown a {
-    display: block;
-    padding: 0.75rem 1rem;
-    color: white;
-    text-decoration: none;
-    border-bottom: 1px solid #444;
-  }
-  
-  #menuDropdown a:hover {
-    background: #444;
-  }
-  
-  /* === Contenedor principal === */
+
   .container,
   .cam-x-container {
-    max-width: 1000px;
-    margin: 2rem auto;
     padding: 1rem;
+    margin: 1rem auto;
   }
-  
-  /* === Botones de acciones === */
+
   .add-btn-container {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.5rem;
-  }
-  
-  .add-btn-container a,
-  .btn-restart {
-    color: white;
-    padding: 0.6rem 1.2rem;
-    border-radius: 5px;
-    font-weight: bold;
-    text-decoration: none;
-    transition: background 0.2s ease;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .add-btn-container a {
-    background-color: #28a745;
-  }
-  
-  .add-btn-container a:hover {
-    background-color: #218838;
-  }
-  
-  .btn-restart {
-    background-color: #17a2b8;
-  }
-  
-  .btn-restart:hover {
-    background-color: #138496;
-  }
-  
-  /* === Grid de cámaras === */
-  .cams-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  .cam-card {
-    background: #222;
-    border: 1px solid #333;
-    border-radius: 10px;
-    padding: 1rem;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    display: flex;
     flex-direction: column;
-    justify-content: space-between;
   }
-  
-  .cam-preview {
-    background: #444;
-    height: 180px;
-    border-radius: 6px;
-    margin-bottom: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #bbb;
-    overflow: hidden;
-  }
-  
-  .cam-info h3 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .cam-info p {
-    font-size: 0.95rem;
-    color: #ccc;
-  }
-  
-  /* === Botones dentro de tarjetas === */
-  .cam-actions {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-  }
-  
-  .btn {
-    flex: 1;
-    padding: 0.5rem;
-    font-size: 0.95rem;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    border: none;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    transition: opacity 0.2s ease;
-  }
-  
-  .btn:hover {
-    opacity: 0.85;
-  }
-  
-  .btn-go {
-    background: #007bff;
-    color: white;
-  }
-  
-  .btn-edit {
-    background: #ffc107;
-    color: black;
-  }
-  
-  .btn-delete {
-    background: #dc3545;
-    color: white;
-  }
-  
-  /* === Formularios generales === */
-  form,
-  .form-box {
-    background: #222;
-    padding: 2rem;
-    border-radius: 10px;
-    max-width: 500px;
-    margin: 2rem auto;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  form input,
-  form select,
-  .form-box input {
-    width: 100%;
-    background: #333;
-    border: 1px solid #444;
-    color: white;
-    padding: 0.6rem;
-    border-radius: 5px;
-    font-size: 1rem;
-  }
-  
-  form label {
-    font-weight: bold;
-    color: #ccc;
-  }
-  
-  form button,
-  .form-box button {
-    background: #28a745;
-    color: white;
-    font-weight: bold;
-    padding: 0.75rem;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-  
-  form button:hover,
-  .form-box button:hover {
-    background-color: #218838;
-  }
-  
-  /* === Enlace para regresar === */
-  .back-link,
-  .form-box a {
-    display: block;
-    margin-top: 1rem;
-    text-align: center;
-    color: #ccc;
-    text-decoration: none;
-  }
-  
-  .back-link:hover,
-  .form-box a:hover {
-    color: white;
-  }
-  
-  /* === Layout página cam-x === */
+
   .cam-x-layout {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    margin-top: 2rem;
-    align-items: flex-start;
-  }
-  
-  .cam-x-video-wrapper {
-    flex: 2;
-    background: #222;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-  }
-  
-  .cam-x-video-wrapper video {
-    width: 100%;
-    border-radius: 10px;
-  }
-  
-  .cam-x-sidebar {
-    flex: 1;
-    background: #1a1a1a;
-    padding: 1rem;
-    border-radius: 10px;
-    max-height: 80vh;
-    overflow-y: auto;
-    display: flex;
     flex-direction: column;
     gap: 1rem;
-    min-width: 240px;
   }
-  
-  .cam-preview-card {
-    background: #2a2a2a;
-    padding: 1rem;
-    border-radius: 6px;
-    text-align: center;
+
+  .cam-x-sidebar {
+    width: 100%;
+    max-height: none;
+    padding: 1rem 0;
   }
-  
-  .cam-preview-thumb {
-    height: 120px;
-    background: #444;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #bbb;
+
+  .form-box,
+  form {
+    width: 90%;
+    margin: 1rem auto;
+    padding: 1.5rem;
   }
-  
-  .cam-preview-title {
-    font-size: 1rem;
-    color: #eee;
+
+  .cams-grid {
+    grid-template-columns: 1fr;
   }
-  
-  .no-other-cams {
-    color: #888;
-    text-align: center;
-    padding: 3rem 0;
-    font-style: italic;
+
+  .cam-preview {
+    height: 160px;
   }
-  
-  /* === Responsive === */
-  @media (max-width: 768px) {
-    .navbar {
-      flex-wrap: wrap;
-      padding: 1rem;
-    }
-  
-    .navbar a {
-      margin: 0.5rem 0.5rem 0.5rem 0;
-    }
-  
-    .container,
-    .cam-x-container {
-      padding: 1rem;
-      margin: 1rem auto;
-    }
-  
-    .add-btn-container {
-      flex-direction: column;
-    }
-  
-    .cam-x-layout {
-      flex-direction: column;
-      gap: 1rem;
-    }
-  
-    .cam-x-sidebar {
-      width: 100%;
-      max-height: none;
-      padding: 1rem 0;
-    }
-  
-    .form-box,
-    form {
-      width: 90%;
-      margin: 1rem auto;
-      padding: 1.5rem;
-    }
-  
-    .cams-grid {
-      grid-template-columns: 1fr;
-    }
-  
-    .cam-preview {
-      height: 160px;
-    }
-  
-    .cam-actions {
-      flex-direction: column;
-    }
-  
-    .btn {
-      font-size: 0.9rem;
-      padding: 0.4rem;
-    }
+
+  .cam-actions {
+    flex-direction: column;
   }
+
+  .btn {
+    font-size: 0.9rem;
+    padding: 0.4rem;
+  }
+}

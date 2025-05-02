@@ -85,19 +85,20 @@ export default function webServer() {
     app.post('/user/:userId/restart-streams', ensureAuth, async (req, res) => {
         const userId = req.params.userId;                    // Obtemos la ID del usuario desde la URL aunque también está en el req.body
 
-        const sockets = userSockets.get(userId);             // 
+        const sockets = userSockets.get(userId);             // Buscamos el websocket abierto que coincida con la ID del usuario que ha hecho la petición
         if (!sockets || sockets.size === 0) {
-            console.warn(`No active WebSocket clients for user ${userId}`);
-            return res.redirect(`/user/${userId}/cams/`);
+            console.log(`No hay websockets abiertos para el usuario ${userId}`);  // No hay ninguno abierto
+            return res.json({ error: 'No hay transmisiones en curso'})              
         }
 
-        for (const ws of sockets) {
+        // Por cada websocket abierto enviar un mensaje de reinicio
+        for (const ws of sockets) {             
             if (ws.readyState === 1) {
                 ws.send(JSON.stringify({ type: 'restart' }));
             }
         }
 
-        console.log(`🔁 Restart command sent to user ${userId}'s clients`);
+        console.log(`Comando de reinicio enviado al usuario ${userId}`);
         res.redirect(`/user/${userId}/cams/`);
     });
 
@@ -193,7 +194,7 @@ export default function webServer() {
             });
         } catch (err) {
             console.error(err);
-            res.status(500).send("Server error");
+            res.status(500).json({ error: err });
         }
     });
 
@@ -213,7 +214,7 @@ export default function webServer() {
 
     app.get('/download', function(req, res){
         const file = './public/downloads/CameraManager.exe';
-        res.download(file); // Set disposition and send it.
+        res.download(file); // Descarga del ejecutable
     });
 
     const server = http.createServer(app);  // Creamos un servidor http que contenga la app de express
