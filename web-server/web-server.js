@@ -167,13 +167,17 @@ export default function webServer() {
     // GET para configurar camaras (añadir, editar, etc.)
     app.get('/user/:userId/cams/conf', ensureAuth, async (req, res) => {
         const userId = req.params.userId;               // Pillamos la ID del usuario de la url aunque también podemos del req.user
-        res.render("cam-conf.ejs", { id: userId, camId: "" });     // Renderizamos la página
+        res.render("cam-conf.ejs", { id: userId, cam: {} });     // Renderizamos la página
     });
 
     app.get('/user/:userId/cams/conf/:camId', ensureAuth, async (req, res) => {
         const userId = req.params.userId;               // Pillamos la ID del usuario de la url aunque también podemos del req.user
         const camId = req.params.camId
-        res.render("cam-conf.ejs", { id: userId, camId: camId });     // Renderizamos la página
+        
+        const user = await users.getUserByID(userId);   // Obtenemos su JSON
+        const cam = user.cams.find( cam => cam.id == camId );
+
+        res.render("cam-conf.ejs", { id: userId, cam: cam });     // Renderizamos la página
     });
 
     // GET para la página de una camara en particular, transimison

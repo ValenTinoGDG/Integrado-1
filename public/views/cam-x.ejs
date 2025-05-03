@@ -5,7 +5,7 @@
   <script src="https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title><%= cam.name %> | MyCamApp</title>
+  <title><%= cam.name %> | CamVisor</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -27,12 +27,14 @@
       <div class="cam-x-sidebar">
         <% if (otherCams.length > 0) { %>
           <% otherCams.forEach(other => { %>
-            <div class="cam-preview-card">
-              <div class="cam-preview-thumb">
-                <span class="cam-placeholder">Preview</span>
+            <a href="/user/<%= id %>/cams/<%= other.id %>" class="cam-preview-link">
+              <div class="cam-preview-card">
+                <div class="cam-preview-thumb">
+                  <span class="cam-placeholder">Preview</span>
+                </div>
+                <p class="cam-preview-title"><%= other.name %></p>
               </div>
-              <p class="cam-preview-title"><%= other.name %></p>
-            </div>
+            </a>
           <% }) %>
         <% } else { %>
           <div class="no-other-cams">
@@ -66,6 +68,8 @@
           video.play();
           updateCanvasSize(); // Update canvas size once video is ready
         });
+      } else {
+        vide.innerText = "No hay video"
       }
     }
 

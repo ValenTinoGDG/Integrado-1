@@ -11,16 +11,17 @@ html, body {
   background: #111;
   color: white;
   line-height: 1.6;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 /* === Fade Text for Overflow with Ellipsis === */
 .fade-text {
   position: relative;
   display: inline-block;
-  max-width: 100%; /* Ensure the element doesn't stretch to fill the container */
+  max-width: 100%;
   overflow: hidden;
-  white-space: nowrap; /* Prevents text from wrapping, ensuring overflow happens */
-  text-overflow: ellipsis; /* Adds the ellipsis when the text overflows */
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .fade-text::after {
@@ -31,12 +32,12 @@ html, body {
   bottom: 0;
   left: 0;
   background: linear-gradient(to right, transparent);
-  pointer-events: none; /* Ensures that it doesn't block interaction */
-  opacity: 0; /* Hidden initially */
+  pointer-events: none;
+  opacity: 0;
   transition: opacity 0.3s ease-in-out;
 }
 
-/* === Estilos de Navbar === */
+/* === Navbar === */
 .navbar {
   background: #222;
   padding: 1rem 2rem;
@@ -44,6 +45,9 @@ html, body {
   justify-content: space-between;
   align-items: center;
   font-size: 1.1rem;
+  width: 100%;
+  max-width: 100%;
+  flex-wrap: wrap;
 }
 
 .navbar a {
@@ -97,7 +101,7 @@ html, body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* === Contenedor principal === */
+/* === Main Container === */
 .container,
 .cam-x-container {
   max-width: 1000px;
@@ -105,7 +109,7 @@ html, body {
   padding: 1rem;
 }
 
-/* === Botones de acciones === */
+/* === Action Buttons === */
 .add-btn-container {
   display: flex;
   gap: 1rem;
@@ -117,12 +121,13 @@ html, body {
 .btn-restart {
   color: white;
   padding: 0.6rem 1.2rem;
+  width: auto;
   border-radius: 5px;
   font-weight: bold;
   text-decoration: none;
-  transition: background 0.2s ease;
   border: none;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .add-btn-container a {
@@ -141,7 +146,7 @@ html, body {
   background-color: #138496;
 }
 
-/* === Grid de cámaras === */
+/* === Camera Grid === */
 .cams-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -156,7 +161,6 @@ html, body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 
 .cam-preview {
@@ -181,7 +185,7 @@ html, body {
   color: #ccc;
 }
 
-/* === Botones dentro de tarjetas === */
+/* === Buttons within Cards === */
 .cam-actions {
   display: flex;
   gap: 0.5rem;
@@ -210,7 +214,8 @@ html, body {
 
 .btn-go {
   background: #007bff;
-  color: white;
+  color: black;
+  
 }
 
 .btn-edit {
@@ -220,7 +225,7 @@ html, body {
 
 .btn-delete {
   background: #dc3545;
-  color: white;
+  color: black;
 }
 
 /* === Formularios generales === */
@@ -271,7 +276,11 @@ form button:hover,
   background-color: #218838;
 }
 
-/* === Enlace para regresar === */
+#authForm {
+  margin-top: 100px;
+}
+
+/* === Back Link === */
 .back-link,
 .form-box a {
   display: block;
@@ -286,7 +295,7 @@ form button:hover,
   color: white;
 }
 
-/* === Layout página cam-x === */
+/* === Layout for Camera Page === */
 .cam-x-layout {
   display: flex;
   flex-wrap: wrap;
@@ -302,15 +311,14 @@ form button:hover,
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
   position: relative;
-  overflow: hidden; /* Prevents overflow */
-  max-width: 100%; /* Prevents the video container from overflowing */
-  z-index: 100;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .cam-x-video-wrapper video {
   width: 100%;
-  height: auto; /* Ensure the video scales responsively */
-  object-fit: cover; /* Ensures the video fills the container */
+  height: auto;
+  object-fit: cover;
   border-radius: 10px;
 }
 
@@ -355,7 +363,7 @@ form button:hover,
   min-width: 240px;
 }
 
-/* === Cam preview cards === */
+/* === Camera Preview Cards === */
 .cam-preview-card {
   background: #2a2a2a;
   padding: 1rem;
@@ -386,6 +394,12 @@ form button:hover,
   font-style: italic;
 }
 
+.cam-preview-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 /* === Canvas Overlay === */
 #face-canvas {
   position: absolute;
@@ -395,10 +409,10 @@ form button:hover,
   height: 100%;
   pointer-events: none;
   z-index: 50;
-  border-radius: 10px; /* Matching the video container's rounded corners */
+  border-radius: 10px;
 }
 
-/* === Face Detection Toggle Button (now inline) === */
+/* === Face Detection Toggle Button === */
 #toggleFaces {
   flex-shrink: 0;
   padding: 10px 18px;
@@ -416,23 +430,15 @@ form button:hover,
 #toggleFaces:hover {
   background-color: #0056b3;
 }
-
 /* === Responsive === */
 @media (max-width: 768px) {
   .navbar {
     flex-wrap: wrap;
     padding: 1rem;
-    
   }
 
   .navbar a {
     margin: 0.5rem 0.5rem 0.5rem 0;
-  }
-
-  .container,
-  .cam-x-container {
-    padding: 1rem;
-    margin: 1rem auto;
   }
 
   .add-btn-container {
@@ -442,6 +448,10 @@ form button:hover,
   .cam-x-layout {
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .cam-x-video-wrapper{
+    width: 100%;
   }
 
   .cam-x-sidebar {
@@ -457,20 +467,46 @@ form button:hover,
     padding: 1.5rem;
   }
 
+  /* Fix grid and prevent overflow */
   .cams-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* 1 column grid for smaller screens */
+    gap: 1rem;
+    width: 100%; /* Ensure grid takes up 100% of available width */
+    padding: 0 10px; /* Remove horizontal overflow */
+    box-sizing: border-box; /* Prevents padding from increasing width */
+    overflow-x: hidden; /* Prevent horizontal overflow */
+  }
+
+  /* Fix individual cam cards */
+  .cam-card {
+    max-width: 100%; /* Ensure cards don't exceed container width */
+    width: 100%; /* Ensure cards are contained within the grid */
+    padding: 1rem;
+    box-sizing: border-box; /* Padding will not cause overflow */
+    overflow: hidden; /* Hide any overflow */
   }
 
   .cam-preview {
     height: 160px;
+    overflow: hidden; /* Prevent overflow from images */
   }
 
   .cam-actions {
     flex-direction: column;
   }
 
-  .btn {
-    font-size: 0.9rem;
-    padding: 0.4rem;
+  /* Further adjust for screens below 480px */
+  @media (max-width: 480px) {
+    .cams-grid {
+      grid-template-columns: 1fr; /* Single column grid for small screens */
+      gap: 0.8rem; /* Adjust gap */
+      padding-left: 10px; /* Add left padding */
+      padding-right: 10px; /* Add right padding */
+    }
+
+    .cam-card {
+      width: 100%; /* Ensure cards are 100% of available space */
+      padding: 0.5rem; /* Reduce padding if necessary */
+    }
   }
 }

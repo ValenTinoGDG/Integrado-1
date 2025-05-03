@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Configure Camera</title>
+  <title>Configuración</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -13,35 +13,35 @@
     <%- include('partials/navbar', { id }) %>
 
   <div class="container">
-    <h2>➕ Add New Camera</h2>
+    <h2>➕ Agregar cámara</h2>
     <form action="/user/<%= id %>/cams/add" method="POST">
 
-      <input type="hidden" id="id" name="id" value="<%= camId %>">
+      <input type="hidden" id="id" name="id" value="<%= cam.id %>">
 
       <div>
-        <label for="name">Camera Name</label>
-        <input type="text" id="name" name="name" required />
+        <label for="name">Nombre</label>
+        <input type="text" id="name" name="name" value="<%= cam.name %>" placeholder="Cámara garage" required />
       </div>
 
       <div>
-        <label for="ip">Camera IP/URN</label>
-        <input type="text" id="ip" name="ip" required />
+        <label for="ip">Dirección IP/URN</label>
+        <input type="text" id="ip" name="ip" value="<%= cam.ip %>" placeholder="192.168.1.100/stream" required />
       </div>
 
       <div>
-        <label for="user">Username</label>
-        <input type="text" id="user" name="user" required />
+        <label for="user">Usuario</label>
+        <input type="text" id="user" name="user" value="<%= cam.user %>" placeholder="admin" required />
       </div>
 
       <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required />
+        <label for="password">Clave</label>
+        <input type="password" id="password" name="password" value="<%= cam.password %>" placeholder="admin" required />
       </div>
 
-      <button type="submit">Save Camera</button>
+      <button type="submit">Guardar</button>
     </form>
 
-    <a href="/user/<%= id %>/cams" class="back-link">← Back to Cameras</a>
+    <a href="/user/<%= id %>/cams" class="back-link">← Volver</a>
   </div>
 </body>
 </html>
