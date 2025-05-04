@@ -5,7 +5,7 @@ import startNgrok from './web-server/ngrok.js';         // Esto es para tuneliza
 const { server, port } = webServer();   // Obtengo el servidor web y su puerto
 wsReceiver(server);                     // Le paso el servidor web al receptor de transmisiones (es para que usen el mismo puerto porque ngrok solo permitia uno sin pagar)
 
-startNgrok();   // Inicia la tunelización
+//startNgrok();   // Inicia la tunelización con ngrok (me he pasado de cuota)
 
 // Iniciamos el servidor
 server.listen(port, () => {

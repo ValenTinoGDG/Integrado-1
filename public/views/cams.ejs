@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Your Cameras</title>
+  <title>Cámaras</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -13,29 +13,31 @@
 
   <div class="container">
     <div class="add-btn-container">
-      <a href="/user/<%= id %>/cams/conf">+ Add Camera</a>
-      <button class="btn-restart" onclick="restartStreams()">🔁 Restart Streams</button>
+      <a class="btn" href="/user/<%= id %>/cams/conf">+ Agregar camara</a>
+      <button class="btn btn-restart" onclick="restartStreams()">🔁 Reiniciar transmisiones</button>
     </div>
 
     <div class="cams-grid">
       <% if (cams.length === 0) { %>
-        <p style="grid-column: 1 / -1; text-align: center;">No cameras yet.</p>
+        <p style="grid-column: 1 / -1; text-align: center;">Sin cámaras aún.</p>
       <% } else { %>
         <% cams.forEach(cam => { %>
           <div class="cam-card">
-            <div class="cam-preview">
-              <div class="cam-placeholder">No preview</div>
-            </div>
+            <a class="cam-preview-link" href="/user/<%= id %>/cams/<%= cam.id %>">
+              <div class="cam-preview">
+                <div class="cam-placeholder">Sin previsualización</div>
+              </div>
+            </a>
             <div class="cam-info">
-              <h3><%= cam.name %></h3>
+              <h3 class="fade-text"><%= cam.name %></h3>
               <p><strong>IP:</strong> <%= cam.ip %></p>
               <p><strong>User:</strong> <%= cam.user %></p>
               <p><strong>Password:</strong> <%= cam.password %></p>
             </div>
             <div class="cam-actions">
-              <a class="btn btn-go" href="/user/<%= id %>/cams/<%= cam.id %>">▶️ Go</a>
-              <a class="btn btn-edit" href="/user/<%= id %>/cams/conf/<%= cam.id %>">✏️ Edit</a>
-              <button class="btn btn-delete" onclick="deleteCamera('<%= cam.id %>')">🗑️ Delete</button>
+              <a class="btn btn-go" href="/user/<%= id %>/cams/<%= cam.id %>">Ver</a>
+              <a class="btn btn-edit" href="/user/<%= id %>/cams/conf/<%= cam.id %>">Editar</a>
+              <button class="btn btn-delete" onclick="deleteCamera('<%= cam.id %>')">Eliminar</button>
             </div>
           </div>
         <% }) %>

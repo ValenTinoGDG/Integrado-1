@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { randomUUID } from 'crypto';
 
-console.log('bbdd ejecutandose...');
+console.log('BBDD ejecutandose...');
 
 const userBluePrint = {
   inUse: false,

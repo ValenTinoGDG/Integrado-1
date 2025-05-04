@@ -2,36 +2,39 @@
 <html lang="en">
 <head>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title><%= cam.name %> | MyCamApp</title>
+  <title><%= cam.name %> | CamVisor</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
 
-  <!-- Navbar Partial -->
   <%- include('partials/navbar', { id }) %>
 
   <div class="container">
-    <div class="cam-x-layout">
+    <div class="cam-x-layout" style="position: relative;">
       <div class="cam-x-video-wrapper">
-        <video id="video" muted autoplay playsinline>
-          <source id="video-source" type="application/x-mpegURL" src="<%= `/user/${id}/${cam.id}/index.m3u8` %>">
-          Your browser does not support the video tag.
-        </video>
-        <h1><%= cam.name %></h1>
+        <video id="video" muted autoplay playsinline></video>
+        <canvas id="face-canvas" style="position: absolute; top: 0; left: 0;"></canvas>
+      
+        <div class="cam-x-header">
+          <h1 class="fade-text"><%= cam.name %></h1>
+          <button id="toggleFaces">Enable Face Detection</button>
+        </div>
       </div>
 
       <div class="cam-x-sidebar">
         <% if (otherCams.length > 0) { %>
           <% otherCams.forEach(other => { %>
-            <div class="cam-preview-card">
-              <div class="cam-preview-thumb">
-                <!-- Replace this with real preview if you have one -->
-                <span class="cam-placeholder">Preview</span>
+            <a href="/user/<%= id %>/cams/<%= other.id %>" class="cam-preview-link">
+              <div class="cam-preview-card">
+                <div class="cam-preview-thumb">
+                  <span class="cam-placeholder">Preview</span>
+                </div>
+                <p class="cam-preview-title"><%= other.name %></p>
               </div>
-              <p class="cam-preview-title"><%= other.name %></p>
-            </div>
+            </a>
           <% }) %>
         <% } else { %>
           <div class="no-other-cams">
@@ -44,28 +47,92 @@
 
   <script>
     const video = document.getElementById('video');
-    const videoSource = document.getElementById('video-source');
+    const canvas = document.getElementById('face-canvas');
+    const toggleButton = document.getElementById('toggleFaces');
+    let detectingFaces = false;
+    let detectionLoop;
+    const videoSource = "<%= `/user/${id}/${cam.id}/index.m3u8` %>";
 
-    if (Hls.isSupported()) {
-      const hls = new Hls({
-        liveSyncDuration: 20 // Optional, tells HLS.js to aim for ~20s behind live
-      });
-
-      hls.loadSource(videoSource.src);
-      hls.attachMedia(video);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play();
-      });
-
-      
-
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = videoSource.src;
-      video.addEventListener('canplay', () => {
-        video.play();
-      });
+    async function setupStream() {
+      if (Hls.isSupported()) {
+        const hls = new Hls({ liveSyncDuration: 20 });
+        hls.loadSource(videoSource);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play();
+          video.onloadeddata = updateCanvasSize; // Update canvas size once video is ready
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoSource;
+        video.addEventListener('canplay', () => {
+          video.play();
+          updateCanvasSize(); // Update canvas size once video is ready
+        });
+      } else {
+        vide.innerText = "No hay video"
+      }
     }
+
+    function updateCanvasSize() {
+      // Update canvas size to match the video dimensions
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const displaySize = { width: canvas.width, height: canvas.height };
+      faceapi.matchDimensions(canvas, displaySize);
+    }
+
+    async function startFaceDetection() {
+      await faceapi.nets.tinyFaceDetector.loadFromUri('/models/tiny_face_detector');
+
+      // We need to ensure that we're matching the video and canvas dimensions
+      const displaySize = { width: video.videoWidth, height: video.videoHeight };
+      faceapi.matchDimensions(canvas, displaySize);
+
+      detectionLoop = async () => {
+        if (!detectingFaces) return;
+
+        // Detect faces from the video
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 }));
+        const resized = faceapi.resizeResults(detections, displaySize);
+
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous faces
+
+        resized.forEach(detection => {
+          const box = detection.box;
+          const drawBox = new faceapi.draw.DrawBox(box, {
+            label: '',
+            boxColor: 'red',
+            lineWidth: 2
+          });
+          drawBox.draw(canvas);
+        });
+
+        requestAnimationFrame(detectionLoop); // Repeat the loop
+      };
+
+      detectionLoop();
+    }
+
+    toggleButton.addEventListener('click', () => {
+      detectingFaces = !detectingFaces;
+      toggleButton.innerText = detectingFaces ? 'Disable Face Detection' : 'Enable Face Detection';
+
+      if (detectingFaces) {
+        if (video.readyState >= 2) {
+          startFaceDetection(); // Start detection if video is ready
+        } else {
+          video.onloadeddata = () => startFaceDetection(); // Wait for the video to load
+        }
+      } else {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas when detection is off
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', setupStream);
+    window.addEventListener('resize', updateCanvasSize); // Adjust canvas size on window resize
   </script>
 </body>
 </html>
